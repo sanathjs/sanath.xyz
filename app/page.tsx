@@ -11,9 +11,10 @@ import ExperienceCard from "@/components/resume/ExperienceCard";
 import ProjectCard from "@/components/resume/ProjectCard";
 import EducationCard from "@/components/resume/EducationCard";
 import ContactCard from "@/components/resume/ContactCard";
-import PhysicsEngine from "@/components/physics/PhysicsEngine";
+import PhysicsEngine, {
+  PhysicsModeContext,
+} from "@/components/physics/PhysicsEngine";
 import PhysicsBody from "@/components/physics/PhysicsBody";
-import { PhysicsContext } from "@/components/physics/PhysicsEngine";
 import Starfield from "@/components/effects/Starfield";
 
 const experienceGradients = [
@@ -29,8 +30,8 @@ const fadeSlideUp = {
 };
 
 function ResumeContent() {
-  const physics = useContext(PhysicsContext);
-  const isAntigravity = physics?.mode === "antigravity";
+  const physicsMode = useContext(PhysicsModeContext);
+  const isAntigravity = physicsMode?.mode === "antigravity";
 
   return (
     <>

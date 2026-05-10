@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useContext } from "react";
-import { PhysicsContext } from "./PhysicsEngine";
+import { PhysicsActionsContext } from "./PhysicsEngine";
 
 interface PhysicsBodyProps {
   id: string;
@@ -21,30 +21,37 @@ export default function PhysicsBody({
   className = "",
 }: PhysicsBodyProps) {
   const elementRef = useRef<HTMLDivElement>(null);
-  const physics = useContext(PhysicsContext);
+  const physics = useContext(PhysicsActionsContext);
+
+  // Stable ref so the registration effect doesn't re-run when context renders
+  const physicsRef = useRef(physics);
+  physicsRef.current = physics;
+  const optionsRef = useRef({ density, restitution, friction });
+  optionsRef.current = { density, restitution, friction };
 
   useEffect(() => {
-    if (!physics || !elementRef.current) return;
+    if (!elementRef.current) return;
 
-    // Small delay to ensure layout is settled
     const timer = setTimeout(() => {
-      if (elementRef.current) {
-        physics.registerBody(id, elementRef.current, {
-          density,
-          restitution,
-          friction,
-        });
+      const p = physicsRef.current;
+      if (p && elementRef.current) {
+        p.registerBody(id, elementRef.current, optionsRef.current);
       }
     }, 100);
 
     return () => {
       clearTimeout(timer);
-      physics.unregisterBody(id);
+      const p = physicsRef.current;
+      if (p) p.unregisterBody(id);
     };
-  }, [id, physics, density, restitution, friction]);
+  }, [id]);
 
   return (
-    <div ref={elementRef} className={`physics-body ${className}`} data-physics-id={id}>
+    <div
+      ref={elementRef}
+      className={`physics-body ${className}`}
+      data-physics-id={id}
+    >
       {children}
     </div>
   );

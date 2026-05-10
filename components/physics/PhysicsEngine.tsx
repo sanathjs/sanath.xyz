@@ -1,10 +1,17 @@
 "use client";
 
-import { createContext, useState, useCallback, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { usePhysicsWorld, PhysicsMode } from "./usePhysicsWorld";
 import ModeToggle from "@/components/layout/ModeToggle";
 
-interface PhysicsContextType {
+// Stable actions — does not change across renders
+interface PhysicsActions {
   registerBody: (
     id: string,
     element: HTMLElement,
@@ -15,11 +22,16 @@ interface PhysicsContextType {
     }
   ) => void;
   unregisterBody: (id: string) => void;
+}
+
+// Mode state — changes when user toggles
+interface PhysicsModeState {
   mode: PhysicsMode;
   toggleMode: () => void;
 }
 
-export const PhysicsContext = createContext<PhysicsContextType | null>(null);
+export const PhysicsActionsContext = createContext<PhysicsActions | null>(null);
+export const PhysicsModeContext = createContext<PhysicsModeState | null>(null);
 
 interface PhysicsEngineProps {
   children: React.ReactNode;
@@ -46,16 +58,11 @@ export default function PhysicsEngine({ children }: PhysicsEngineProps) {
     const newMode = currentMode === "static" ? "antigravity" : "static";
 
     if (newMode === "antigravity") {
-      // Screen shake before transition
       setShaking(true);
       setTimeout(() => setShaking(false), 300);
-
-      // Disable scrolling
       document.body.style.overflow = "hidden";
-      // Scroll to top first
       window.scrollTo({ top: 0, behavior: "instant" });
     } else {
-      // Re-enable scrolling
       document.body.style.overflow = "";
     }
 
@@ -63,29 +70,35 @@ export default function PhysicsEngine({ children }: PhysicsEngineProps) {
     setMode(newMode);
   }, [setMode, getMode]);
 
-  const contextValue: PhysicsContextType = {
-    registerBody,
-    unregisterBody,
-    mode,
-    toggleMode,
-  };
+  // Memoize so PhysicsBody useEffect deps don't churn on every render
+  const actionsValue = useMemo<PhysicsActions>(
+    () => ({ registerBody, unregisterBody }),
+    [registerBody, unregisterBody]
+  );
+
+  const modeValue = useMemo<PhysicsModeState>(
+    () => ({ mode, toggleMode }),
+    [mode, toggleMode]
+  );
 
   return (
-    <PhysicsContext.Provider value={contextValue}>
-      <div
-        ref={canvasRef}
-        className={`relative ${shaking ? "screen-shake" : ""}`}
-        style={{
-          minHeight: mode === "antigravity" ? "100vh" : undefined,
-          height: mode === "antigravity" ? "100vh" : undefined,
-          overflow: mode === "antigravity" ? "hidden" : undefined,
-        }}
-      >
-        {children}
-        {!prefersReducedMotion && (
-          <ModeToggle mode={mode} onToggle={toggleMode} />
-        )}
-      </div>
-    </PhysicsContext.Provider>
+    <PhysicsActionsContext.Provider value={actionsValue}>
+      <PhysicsModeContext.Provider value={modeValue}>
+        <div
+          ref={canvasRef}
+          className={`relative ${shaking ? "screen-shake" : ""}`}
+          style={{
+            minHeight: mode === "antigravity" ? "100vh" : undefined,
+            height: mode === "antigravity" ? "100vh" : undefined,
+            overflow: mode === "antigravity" ? "hidden" : undefined,
+          }}
+        >
+          {children}
+          {!prefersReducedMotion && (
+            <ModeToggle mode={mode} onToggle={toggleMode} />
+          )}
+        </div>
+      </PhysicsModeContext.Provider>
+    </PhysicsActionsContext.Provider>
   );
 }
