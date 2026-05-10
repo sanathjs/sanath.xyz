@@ -194,8 +194,11 @@ export function usePhysicsWorld(): PhysicsWorld {
 
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const maxBodyW = vw - 80;
-      const maxBodyH = vh - 80;
+      // Cap physics body size aggressively so tall cards have room to fall
+      // and bounce. The visual element remains its natural size; only the
+      // collision shape is smaller.
+      const maxBodyW = Math.min(vw * 0.6, 500);
+      const maxBodyH = Math.min(vh * 0.3, 250);
 
       const body = Matter.Bodies.rectangle(
         centerX,
@@ -236,9 +239,10 @@ export function usePhysicsWorld(): PhysicsWorld {
       modeRef.current = mode;
 
       if (mode === "antigravity") {
-        // Real downward gravity — elements fall like Google Antigravity
+        // Real downward gravity — elements fall like Google Antigravity.
+        // Boost y > 1 for a more noticeable drop on a small physics canvas.
         engine.gravity.x = 0;
-        engine.gravity.y = 1;
+        engine.gravity.y = 1.5;
 
         // Attach mouse only now, so static mode doesn't have event listeners
         attachMouseConstraint();
@@ -271,33 +275,40 @@ export function usePhysicsWorld(): PhysicsWorld {
             rect.left >= 0 &&
             rect.right <= vw;
 
+          // Always spawn at a random position spread across the viewport.
+          // Use the (smaller) physics body dimensions to compute safe bounds
+          // so the body doesn't intersect the walls and get stuck.
+          const margin = 40;
+          // Use the body's bounds (already clamped to small max) for spawn calc
+          const bodyHalfW = (body.bounds.max.x - body.bounds.min.x) / 2;
+          const bodyHalfH = (body.bounds.max.y - body.bounds.min.y) / 2;
+          const minX = margin + bodyHalfW;
+          const maxX = vw - margin - bodyHalfW;
+          const minY = margin + bodyHalfH;
+          const maxY = vh - margin - bodyHalfH;
+
           if (inViewport) {
-            // Element is currently visible — start it where it is, plus a
-            // tiny random nudge so multiple elements aren't perfectly aligned
-            targetX = layoutX + (Math.random() - 0.5) * 20;
-            targetY = layoutY + (Math.random() - 0.5) * 20;
+            // Visible elements: keep them roughly where they are with a
+            // small nudge, but clamp to safe spawn bounds.
+            targetX = Math.max(minX, Math.min(maxX, layoutX));
+            targetY = Math.max(minY, Math.min(maxY, layoutY));
           } else {
-            // Element is off-screen — spawn it in the upper half of viewport
-            const margin = 40;
-            const halfW = Math.min(rect.width / 2, vw / 2 - margin);
-            targetX =
-              margin + halfW + Math.random() * (vw - 2 * (margin + halfW));
-            targetY = margin + Math.random() * (vh / 2);
+            // Off-screen elements: random spot across the whole viewport.
+            targetX = minX + Math.random() * Math.max(0, maxX - minX);
+            targetY = minY + Math.random() * Math.max(0, maxY - minY);
           }
 
           Matter.Body.setPosition(body, { x: targetX, y: targetY });
-          Matter.Body.setAngle(body, 0);
-          Matter.Body.setVelocity(body, { x: 0, y: 0 });
-          Matter.Body.setAngularVelocity(body, 0);
+          Matter.Body.setAngle(body, (Math.random() - 0.5) * 0.2);
           Matter.Body.setStatic(body, false);
 
-          // Small horizontal nudge + tilt so the fall looks natural
-          const tilt = (Math.random() - 0.5) * 0.05;
-          Matter.Body.setAngularVelocity(body, tilt);
-          Matter.Body.applyForce(body, body.position, {
-            x: (Math.random() - 0.5) * 0.02,
-            y: 0,
+          // Give each body an initial random velocity so the drop looks
+          // immediately alive instead of starting from a dead stop.
+          Matter.Body.setVelocity(body, {
+            x: (Math.random() - 0.5) * 6,
+            y: (Math.random() - 0.5) * 4,
           });
+          Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1);
         });
       } else {
         // Re-entering static mode: turn gravity off, reassemble
