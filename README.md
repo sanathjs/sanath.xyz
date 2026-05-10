@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# sanath.xyz
 
-## Getting Started
+Personal portfolio website for Sanath Kumar J S — a Google Antigravity-style interactive resume.
 
-First, run the development server:
+The site loads as a polished static resume. Click the "Try Antigravity" button to break the layout — every section becomes a draggable, bouncing, colliding physics object floating in zero gravity. Click "Read Resume" to smoothly reassemble.
+
+## Tech Stack
+
+- **Next.js 16** (App Router, static export)
+- **Matter.js** — 2D physics engine driving the antigravity effect
+- **Framer Motion** — entrance animations and transitions
+- **Tailwind CSS 4** — gradient/colorful theme
+- **TypeScript** — strict mode
+
+## Local Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+Static export is configured in `next.config.ts` (`output: "export"`). The build output goes to the `out/` directory.
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deployed to Vercel and mapped to the `sanath.xyz` domain. Pushing to the connected branch triggers an automatic deploy.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+- `app/` — Next.js App Router pages, layout, global styles
+- `components/physics/` — Matter.js engine bridge (`PhysicsEngine`, `PhysicsBody`, `usePhysicsWorld`)
+- `components/resume/` — individual resume section components
+- `components/layout/` — `ModeToggle`, `CardModal`
+- `components/effects/` — `Starfield` background
+- `lib/resume-data.ts` — single source of truth for all resume content
+- `lib/physics-config.ts` — physics constants
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How the antigravity effect works
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Real DOM elements are moved by Matter.js — there is no canvas. The physics engine runs headlessly, and on each tick the body positions are applied to DOM elements via `transform: translate(...) rotate(...)`. This keeps the resume content accessible, selectable, and SEO-indexed even while bouncing around.
+
+On small screens (<768px) the antigravity toggle is hidden and the page renders as a normal static resume. Users with `prefers-reduced-motion` enabled also see the static resume.

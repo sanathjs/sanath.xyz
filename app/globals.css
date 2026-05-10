@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a1a;
+  --foreground: #f0f0f5;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-hover: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
@@ -12,15 +15,158 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 30%, #0a1628 60%, #0d1f1a 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Glass card base */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  background: var(--card-hover);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient border cards */
+.gradient-border {
+  position: relative;
+  border: none;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: var(--gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 40%, #ec4899 70%, #f97316 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Skill tag */
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  user-select: none;
+  cursor: grab;
+}
+
+.skill-tag:active {
+  cursor: grabbing;
+}
+
+/* Pulse animation for the toggle button */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.4), 0 0 16px rgba(139, 92, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.6), 0 0 32px rgba(139, 92, 246, 0.3);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Screen shake */
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-3px, -2px) rotate(-0.5deg); }
+  20% { transform: translate(3px, 1px) rotate(0.5deg); }
+  30% { transform: translate(-2px, 3px) rotate(-0.3deg); }
+  40% { transform: translate(2px, -1px) rotate(0.3deg); }
+  50% { transform: translate(-1px, 2px) rotate(-0.2deg); }
+  60% { transform: translate(1px, -2px) rotate(0.2deg); }
+  70% { transform: translate(-3px, 1px) rotate(-0.4deg); }
+  80% { transform: translate(2px, 2px) rotate(0.4deg); }
+  90% { transform: translate(-1px, -1px) rotate(-0.1deg); }
+}
+
+.screen-shake {
+  animation: screen-shake 0.3s ease-in-out;
+}
+
+/* Physics body styling */
+.physics-body {
+  will-change: transform;
+  cursor: grab;
+}
+
+.physics-body:active {
+  cursor: grabbing;
+}
+
+.physics-body.is-static {
+  cursor: default;
+}
+
+/* Section heading */
+.section-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 1rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pulse-glow {
+    animation: none;
+  }
+  .screen-shake {
+    animation: none;
+  }
 }
