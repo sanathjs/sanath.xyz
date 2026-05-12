@@ -35,6 +35,7 @@ export interface Project {
   description: string;
   bullets: string[];
   url?: string;
+  repoUrl?: string;
 }
 
 export const personalInfo = {
@@ -208,12 +209,14 @@ export const projects: Project[] = [
   {
     name: "Interview Bot",
     tech: "Next.js 14 · .NET 8 · pgvector · Groq · HuggingFace · Supabase",
-    description: "AI-Powered Mock Interview Assistant",
+    description: "AI-Powered Mock Interview Assistant — try it live",
     bullets: [
       "Full-stack AI interview assistant using multi-signal RAG (3 embeddings per chunk: body, title, AI-generated question variants). Deployed on $0/month stack: Vercel + Render.com + Supabase + Groq.",
       "Implemented prompt injection detection, voice I/O (Groq Whisper STT + Web Speech TTS), session analytics, and unanswered question tracking with prep dashboard.",
+      "Live at chat.sanath.xyz — feel free to interview my AI clone before you interview me.",
     ],
-    url: "https://github.com/sanathjs/interview-bot",
+    url: "https://chat.sanath.xyz",
+    repoUrl: "https://github.com/sanathjs/interview-bot",
   },
 ];
 

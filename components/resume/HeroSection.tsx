@@ -1,7 +1,7 @@
 "use client";
 
 import { personalInfo } from "@/lib/resume-data";
-import { MapPin, ArrowDown, Sparkles } from "lucide-react";
+import { MapPin, ArrowDown, Sparkles, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -92,6 +92,32 @@ export default function HeroSection() {
         <StatBlock value="300ms" label="p95 Latency" />
         <StatBlock value="40%" label="Match Quality ↑" />
       </motion.div>
+
+      {/* Interviewer callout */}
+      <motion.a
+        href="https://chat.sanath.xyz"
+        target="_blank"
+        rel="noopener noreferrer"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.98 }}
+        className="group mb-6 flex items-center gap-3 px-5 py-3 rounded-full bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 backdrop-blur-md border border-cyan-400/30 hover:border-cyan-400/60 transition-all shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/30"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75 animate-ping" />
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" />
+        </span>
+        <MessageCircle size={16} className="text-cyan-300" />
+        <span className="text-sm text-white/90">
+          <span className="font-semibold text-white">Interviewers:</span>{" "}
+          chat with my AI clone at{" "}
+          <span className="text-cyan-300 font-mono group-hover:underline">
+            chat.sanath.xyz
+          </span>
+        </span>
+      </motion.a>
 
       {/* CTAs */}
       <motion.div
