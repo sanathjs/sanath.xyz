@@ -3,7 +3,6 @@
 import { useContext } from "react";
 import { motion } from "framer-motion";
 import { experiences, projects } from "@/lib/resume-data";
-import { PHYSICS_CONFIG } from "@/lib/physics-config";
 import HeroSection from "@/components/resume/HeroSection";
 import SummaryCard from "@/components/resume/SummaryCard";
 import SkillsSection from "@/components/resume/SkillsSection";
@@ -15,19 +14,46 @@ import PhysicsEngine, {
   PhysicsModeContext,
 } from "@/components/physics/PhysicsEngine";
 import PhysicsBody from "@/components/physics/PhysicsBody";
+import AnimatedBackground from "@/components/effects/AnimatedBackground";
 import Starfield from "@/components/effects/Starfield";
 
 const experienceGradients = [
-  "linear-gradient(135deg, #f59e0b, #f97316)",
-  "linear-gradient(135deg, #8b5cf6, #6366f1)",
-  "linear-gradient(135deg, #3b82f6, #6366f1)",
-  "linear-gradient(135deg, #10b981, #059669)",
+  "linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6)",
+  "linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6)",
+  "linear-gradient(135deg, #3b82f6, #06b6d4, #10b981)",
+  "linear-gradient(135deg, #10b981, #14b8a6, #06b6d4)",
 ];
 
-const fadeSlideUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
+const fadeInUp = {
+  initial: { opacity: 0, y: 40 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-100px" },
 };
+
+function SectionTitle({
+  number,
+  title,
+  hidden,
+}: {
+  number: string;
+  title: string;
+  hidden?: boolean;
+}) {
+  if (hidden) return null;
+  return (
+    <motion.div
+      {...fadeInUp}
+      transition={{ duration: 0.5 }}
+      className="mb-10 flex items-end gap-4"
+    >
+      <span className="text-xs font-mono text-white/30 mb-1">{number}</span>
+      <h2 className="text-3xl md:text-4xl font-bold gradient-text tracking-tight">
+        {title}
+      </h2>
+      <span className="flex-1 h-px bg-gradient-to-r from-white/20 to-transparent mb-3" />
+    </motion.div>
+  );
+}
 
 function ResumeContent() {
   const physicsMode = useContext(PhysicsModeContext);
@@ -36,68 +62,64 @@ function ResumeContent() {
   return (
     <>
       <Starfield visible={isAntigravity} />
-      <main className="relative min-h-screen">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-          {/* Hero */}
-          <PhysicsBody id="hero" density={PHYSICS_CONFIG.density.hero}>
-            <section className="mb-10">
-              <HeroSection />
-            </section>
-          </PhysicsBody>
+      <main className="relative">
+        {/* Hero - full viewport */}
+        <PhysicsBody id="hero">
+          <HeroSection />
+        </PhysicsBody>
 
-          {/* Summary */}
-          <PhysicsBody id="summary">
-            <motion.section
-              className="mb-8"
-              variants={fadeSlideUp}
-              initial="initial"
-              animate="animate"
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
-              <SummaryCard />
-            </motion.section>
-          </PhysicsBody>
+        {/* Content sections */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+          {/* About */}
+          <section className="mb-24">
+            <SectionTitle number="01" title="About" hidden={isAntigravity} />
+            <PhysicsBody id="summary">
+              <motion.div
+                {...fadeInUp}
+                transition={{ duration: 0.6 }}
+              >
+                <SummaryCard />
+              </motion.div>
+            </PhysicsBody>
+          </section>
 
           {/* Skills */}
-          <PhysicsBody id="skills">
-            <motion.section
-              className="mb-8"
-              variants={fadeSlideUp}
-              initial="initial"
-              animate="animate"
-              transition={{ duration: 0.5, delay: 0.7 }}
-            >
-              <SkillsSection />
-            </motion.section>
-          </PhysicsBody>
+          <section className="mb-24">
+            <SectionTitle
+              number="02"
+              title="Stack"
+              hidden={isAntigravity}
+            />
+            <PhysicsBody id="skills">
+              <motion.div
+                {...fadeInUp}
+                transition={{ duration: 0.6 }}
+              >
+                <SkillsSection />
+              </motion.div>
+            </PhysicsBody>
+          </section>
 
           {/* Experience */}
-          <section className="mb-8">
-            {!isAntigravity && (
-              <motion.h2
-                className="section-heading mb-6"
-                variants={fadeSlideUp}
-                initial="initial"
-                animate="animate"
-                transition={{ duration: 0.5, delay: 0.9 }}
-              >
-                Professional Experience
-              </motion.h2>
-            )}
+          <section className="mb-24">
+            <SectionTitle
+              number="03"
+              title="Experience"
+              hidden={isAntigravity}
+            />
             <div className="space-y-6">
               {experiences.map((exp, i) => (
                 <PhysicsBody key={exp.company} id={`exp-${i}`}>
                   <motion.div
-                    variants={fadeSlideUp}
-                    initial="initial"
-                    animate="animate"
-                    transition={{ duration: 0.5, delay: 1.0 + i * 0.15 }}
+                    {...fadeInUp}
+                    transition={{ duration: 0.6, delay: i * 0.08 }}
                   >
                     <ExperienceCard
                       experience={exp}
                       gradient={
                         experienceGradients[i % experienceGradients.length]
                       }
+                      isCurrent={i === 0}
                     />
                   </motion.div>
                 </PhysicsBody>
@@ -106,18 +128,12 @@ function ResumeContent() {
           </section>
 
           {/* Projects */}
-          <section className="mb-8">
-            {!isAntigravity && (
-              <motion.h2
-                className="section-heading mb-6"
-                variants={fadeSlideUp}
-                initial="initial"
-                animate="animate"
-                transition={{ duration: 0.5, delay: 1.7 }}
-              >
-                Notable Projects
-              </motion.h2>
-            )}
+          <section className="mb-24">
+            <SectionTitle
+              number="04"
+              title="Projects"
+              hidden={isAntigravity}
+            />
             <div className="space-y-6">
               {projects.map((project, i) => (
                 <PhysicsBody
@@ -125,10 +141,8 @@ function ResumeContent() {
                   id={`project-${project.name}`}
                 >
                   <motion.div
-                    variants={fadeSlideUp}
-                    initial="initial"
-                    animate="animate"
-                    transition={{ duration: 0.5, delay: 1.8 + i * 0.15 }}
+                    {...fadeInUp}
+                    transition={{ duration: 0.6, delay: i * 0.1 }}
                   >
                     <ProjectCard project={project} />
                   </motion.div>
@@ -137,29 +151,40 @@ function ResumeContent() {
             </div>
           </section>
 
-          {/* Education & Contact */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <PhysicsBody id="education">
-              <motion.div
-                variants={fadeSlideUp}
-                initial="initial"
-                animate="animate"
-                transition={{ duration: 0.5, delay: 2.0 }}
-              >
-                <EducationCard />
-              </motion.div>
-            </PhysicsBody>
-            <PhysicsBody id="contact">
-              <motion.div
-                variants={fadeSlideUp}
-                initial="initial"
-                animate="animate"
-                transition={{ duration: 0.5, delay: 2.1 }}
-              >
-                <ContactCard />
-              </motion.div>
-            </PhysicsBody>
+          {/* Education + Contact */}
+          <section>
+            <SectionTitle
+              number="05"
+              title="Et cetera"
+              hidden={isAntigravity}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PhysicsBody id="education">
+                <motion.div
+                  {...fadeInUp}
+                  transition={{ duration: 0.6 }}
+                >
+                  <EducationCard />
+                </motion.div>
+              </PhysicsBody>
+              <PhysicsBody id="contact">
+                <motion.div
+                  {...fadeInUp}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                  <ContactCard />
+                </motion.div>
+              </PhysicsBody>
+            </div>
           </section>
+
+          {/* Footer */}
+          <footer className="mt-24 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/30">
+            <p>
+              Built with Next.js + Framer Motion · Deployed on Vercel
+            </p>
+            <p>© 2026 Sanath Kumar J S</p>
+          </footer>
         </div>
       </main>
     </>
@@ -168,8 +193,11 @@ function ResumeContent() {
 
 export default function Home() {
   return (
-    <PhysicsEngine>
-      <ResumeContent />
-    </PhysicsEngine>
+    <>
+      <AnimatedBackground />
+      <PhysicsEngine>
+        <ResumeContent />
+      </PhysicsEngine>
+    </>
   );
 }

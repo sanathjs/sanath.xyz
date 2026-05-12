@@ -1,78 +1,163 @@
 "use client";
 
 import { personalInfo } from "@/lib/resume-data";
-import { MapPin, Mail, Phone } from "lucide-react";
-import { motion } from "framer-motion";
+import { MapPin, ArrowDown, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
+
+const roles = [
+  "Lead Software Engineer",
+  ".NET Full-Stack Architect",
+  "AI / RAG Engineer",
+  "Engineering Team Lead",
+  "Microsoft Certified (MCSD)",
+];
 
 export default function HeroSection() {
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setRoleIndex((i) => (i + 1) % roles.length);
+    }, 2400);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="text-center lg:text-left"
-    >
-      <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
-        {/* Profile photo placeholder */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2, type: "spring", stiffness: 200 }}
-          className="w-28 h-28 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center text-4xl font-bold text-white shrink-0 shadow-lg shadow-purple-500/25"
-        >
-          SK
-        </motion.div>
-        <div className="flex-1">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-5xl font-bold gradient-text mb-2"
-          >
-            {personalInfo.name}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-xl md:text-2xl text-white/80 font-light mb-1"
-          >
-            {personalInfo.title}
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-base text-white/50 mb-4"
-          >
-            {personalInfo.subtitle}
-          </motion.p>
+    <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20">
+      {/* Status pill */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8 flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-xs text-white/70"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+        </span>
+        Available for Senior / Staff / Principal roles
+      </motion.div>
+
+      {/* Big name */}
+      <motion.h1
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 0.1 }}
+        className="text-center text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.95] mb-6"
+      >
+        <span className="block gradient-text">Sanath</span>
+        <span className="block gradient-text-vibrant">Kumar.</span>
+      </motion.h1>
+
+      {/* Rotating role */}
+      <div className="h-10 sm:h-12 mb-8 flex items-center justify-center">
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            key={roleIndex}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm text-white/60"
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.4 }}
+            className="text-lg sm:text-2xl text-white/80 font-light flex items-center gap-2"
           >
-            <span className="flex items-center gap-1.5">
-              <MapPin size={14} className="text-purple-400" />
-              {personalInfo.location}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Mail size={14} className="text-pink-400" />
-              <a
-                href={`mailto:${personalInfo.email}`}
-                className="hover:text-white/90 transition-colors"
-              >
-                {personalInfo.email}
-              </a>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Phone size={14} className="text-orange-400" />
-              {personalInfo.phone}
-            </span>
+            <Sparkles className="text-purple-400" size={18} />
+            {roles[roleIndex]}
           </motion.div>
-        </div>
+        </AnimatePresence>
       </div>
-    </motion.div>
+
+      {/* Sub-tagline */}
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        className="text-center text-sm sm:text-base text-white/50 max-w-2xl mb-10 leading-relaxed"
+      >
+        12+ years of building scalable distributed systems and production AI/RAG
+        pipelines. I&apos;ve shipped semantic search engines processing millions of
+        records, led engineering teams of 4–6, and collaborated directly with
+        US-based stakeholders across e-commerce, market research, and healthcare.
+      </motion.p>
+
+      {/* Quick stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mb-12 w-full max-w-3xl"
+      >
+        <StatBlock value="12+" label="Years Experience" />
+        <StatBlock value="10M+" label="Users Served" />
+        <StatBlock value="300ms" label="p95 Latency" />
+        <StatBlock value="40%" label="Match Quality ↑" />
+      </motion.div>
+
+      {/* CTAs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.9 }}
+        className="flex flex-wrap items-center justify-center gap-3 mb-16"
+      >
+        <a
+          href={`mailto:${personalInfo.email}`}
+          className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all"
+        >
+          Get in touch
+        </a>
+        <a
+          href={personalInfo.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-6 py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white text-sm font-medium hover:bg-white/10 hover:border-white/20 transition-all"
+        >
+          LinkedIn
+        </a>
+        <a
+          href={personalInfo.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-6 py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white text-sm font-medium hover:bg-white/10 hover:border-white/20 transition-all"
+        >
+          GitHub
+        </a>
+      </motion.div>
+
+      {/* Location pill */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 1.1 }}
+        className="absolute top-6 left-6 sm:top-8 sm:left-8 hidden sm:flex items-center gap-2 text-xs text-white/40"
+      >
+        <MapPin size={12} />
+        {personalInfo.location}
+      </motion.div>
+
+      {/* Scroll indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 1.4 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 text-xs"
+      >
+        <span className="tracking-widest">SCROLL</span>
+        <ArrowDown size={14} className="animate-scroll" />
+      </motion.div>
+    </section>
+  );
+}
+
+function StatBlock({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-2xl sm:text-3xl font-bold gradient-text-vibrant tabular-nums">
+        {value}
+      </div>
+      <div className="text-[10px] sm:text-xs text-white/40 uppercase tracking-wider mt-1">
+        {label}
+      </div>
+    </div>
   );
 }
