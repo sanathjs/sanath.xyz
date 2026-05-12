@@ -16,6 +16,7 @@ import PhysicsEngine, {
 import PhysicsBody from "@/components/physics/PhysicsBody";
 import AnimatedBackground from "@/components/effects/AnimatedBackground";
 import Starfield from "@/components/effects/Starfield";
+import StarTrail from "@/components/effects/StarTrail";
 
 const experienceGradients = [
   "linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6)",
@@ -195,6 +196,7 @@ export default function Home() {
   return (
     <>
       <AnimatedBackground />
+      <StarTrail />
       <PhysicsEngine>
         <ResumeContent />
       </PhysicsEngine>

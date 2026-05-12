@@ -305,53 +305,75 @@ export default function PhysicsEngine({ children }: PhysicsEngineProps) {
         });
       }, 50);
     } else {
-      // Return to static — reassemble bodies to layout positions
+      // Return to static — bypass physics and directly animate transforms
       engine.gravity.x = 0;
       engine.gravity.y = 0;
       detachMouse();
 
+      // Snapshot the current body state and make it static so engine
+      // doesn't fight our animation
+      const animations: Array<{
+        entry: BodyEntry;
+        sx: number;
+        sy: number;
+        sa: number;
+        ss: number;
+      }> = [];
       registryRef.current.forEach((entry) => {
-        const body = entry.body;
-        const animate = () => {
-          if (modeRef.current !== "static") return;
-          const dx = entry.origX - body.position.x;
-          const dy = entry.origY - body.position.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+        animations.push({
+          entry,
+          sx: entry.body.position.x,
+          sy: entry.body.position.y,
+          sa: entry.body.angle,
+          ss: entry.scale,
+        });
+        Matter.Body.setStatic(entry.body, true);
+      });
 
-          if (dist < 4 && Math.abs(body.angle) < 0.02) {
-            Matter.Body.setStatic(body, true);
-            Matter.Body.setPosition(body, { x: entry.origX, y: entry.origY });
-            Matter.Body.setAngle(body, 0);
+      const start = performance.now();
+      const duration = 700;
+      const tick = (now: number) => {
+        if (modeRef.current !== "static") return;
+        const t = Math.min((now - start) / duration, 1);
+        // ease-out cubic
+        const eased = 1 - Math.pow(1 - t, 3);
+
+        animations.forEach(({ entry, sx, sy, sa, ss }) => {
+          // Interpolated position and angle
+          const x = sx + (entry.origX - sx) * eased;
+          const y = sy + (entry.origY - sy) * eased;
+          const a = sa + (0 - sa) * eased;
+          const s = ss + (1 - ss) * eased;
+
+          // Apply transform relative to layout center
+          const dx = x - entry.origX;
+          const dy = y - entry.origY;
+          const deg = a * (180 / Math.PI);
+          entry.element.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(${deg}deg) scale(${s})`;
+
+          if (t >= 1) {
+            // Snap physics body too so it's ready for the next toggle
+            Matter.Body.setPosition(entry.body, {
+              x: entry.origX,
+              y: entry.origY,
+            });
+            Matter.Body.setAngle(entry.body, 0);
+            Matter.Body.setVelocity(entry.body, { x: 0, y: 0 });
+            Matter.Body.setAngularVelocity(entry.body, 0);
+            entry.scale = 1;
             entry.element.style.transform = "";
             entry.element.style.zIndex = "";
             entry.element.style.willChange = "";
-            return;
           }
+        });
 
-          Matter.Body.applyForce(body, body.position, {
-            x: dx * 0.0008,
-            y: dy * 0.0008,
-          });
-          // Strong damping for smooth approach
-          Matter.Body.setVelocity(body, {
-            x: body.velocity.x * 0.85,
-            y: body.velocity.y * 0.85,
-          });
-          // Rotate angle toward 0
-          const angleToZero = -body.angle * 0.1;
-          Matter.Body.setAngularVelocity(body, angleToZero);
-
-          requestAnimationFrame(animate);
-        };
-        requestAnimationFrame(animate);
-      });
-
-      // Re-enable scroll after reassembly window
-      setTimeout(() => {
-        if (modeRef.current === "static") {
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
           document.body.style.overflow = "";
         }
-      }, 800);
+      };
+      requestAnimationFrame(tick);
     }
 
     setModeState(newMode);
